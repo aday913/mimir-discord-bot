@@ -38,6 +38,25 @@ async def roster(ctx):
     await ctx.send(f"```{message}```")
 
 
+@bot.command(name="projected", help="Get the projected score for a matchup by week number")
+async def projected(ctx, week: int):
+    logging.info(f"Projected command invoked by {ctx.author} in channel {ctx.channel} for week {week}")
+    if week < 1 or week > 17:
+        await ctx.send("Please provide a valid week number between 1 and 17.")
+        return
+
+    box_scores = fantasy_manager.league.box_scores(week)
+    if not box_scores:
+        await ctx.send(f"No box scores found for week {week}.")
+        return
+
+    message = f"""Projected Scores for week {week}:\n"""
+    for box_score in box_scores:
+        message += f"  {box_score.home_team.team_name}: {box_score.home_projected}, {box_score.away_team.team_name}: {box_score.away_projected}\n"
+    logging.info(f"Projected command completed. Sending message:\n{message}")
+    await ctx.send(f"```{message}```")
+
+
 @bot.event
 async def on_ready():
     log.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
