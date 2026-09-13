@@ -25,14 +25,25 @@ bot = commands.Bot(
 fantasy_manager: FantasyManager = None
 
 @bot.command(name="roster", help="Get the roster of a team by team ID")
-async def roster(ctx):
+async def roster(ctx, name: str):
     logging.info(f"Roster command invoked by {ctx.author} in channel {ctx.channel}")
     league = fantasy_manager.league
 
-    my_team = league.teams[0]  # Assuming you want the first team in the league
+    with open("team_mappings.json", "r") as f:
+        team_mappings = json.load(f)
 
-    message = """Example Roster:\n"""
-    for player in my_team.roster:
+    if name.lower() not in team_mappings:
+        await ctx.send(f"Team name '{name}' not found in team mappings.")
+        return
+
+    team_id = team_mappings[name.lower()]
+    team = next((team for team in league.teams if str(team.team_id) == team_id), None)
+    if not team:
+        await ctx.send(f"Team with ID '{team_id}' not found in the league.")
+        return
+
+    message = f"Roster for {team.team_name}:\n"
+    for player in team.roster:
         message += f"{player.name:<20} Position: {player.position:<5} Linup Slot: {player.lineupSlot:<10} Status: {player.injuryStatus}\n"
     logging.info(f"Roster command completed. Sending message:\n{message}")
     await ctx.send(f"```{message}```")
