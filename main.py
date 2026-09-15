@@ -68,6 +68,55 @@ async def projected(ctx, week: int):
     await ctx.send(f"```{message}```")
 
 
+@bot.command(name="scores", help="Get box scores for a specific week. Provide a name for their specific matchup")
+async def scores(ctx, week: int | None, name: str | None):
+    if not week:
+        await ctx.send("Please provide a week number (and optionally a manager name)")
+        return
+    logging.info(f"Scores command invoked by {ctx.author} in channel {ctx.channel} for week {week} and team name {name}")
+    if week < 1 or week > 17:
+        await ctx.send("Please provide a valid week number between 1 and 17.")
+        return
+
+    box_scores = fantasy_manager.league.box_scores(week)
+    if not box_scores:
+        await ctx.send(f"No box scores found for week {week}.")
+        return
+
+    if not name:
+        for box_score in box_scores:
+            message = f'''
+ {box_score.home_team.team_name} - Projected: {box_score.home_projected:6.2f}, Actual: {box_score.home_score:6.2f}
+/
+\\
+ {box_score.away_team.team_name} - Projected: {box_score.away_projected:6.2f}, Actual: {box_score.away_score:6.2f}
+'''
+            await ctx.send(f"```{message}```")
+        return
+
+    with open("team_mappings.json", "r") as f:
+        team_mappings = json.load(f)
+
+    if name.lower() not in team_mappings:
+        await ctx.send(f"Team name '{name}' not found in team mappings.")
+        return
+
+    team_id = team_mappings[name.lower()]
+    matchup = next((box_score for box_score in box_scores if str(box_score.home_team.team_id) == team_id or str(box_score.away_team.team_id) == team_id), None)
+    if not matchup:
+        await ctx.send(f"No matchup found for team '{name}' in week {week}.")
+        return
+
+    message = f'''
+ {matchup.home_team.team_name} - Projected: {matchup.home_projected:6.2f}, Actual: {matchup.home_score:6.2f}
+/
+\\
+ {matchup.away_team.team_name} - Projected: {matchup.away_projected:6.2f}, Actual: {matchup.away_score:6.2f}
+'''
+    logging.info(f"Scores command completed. Sending message:\n{message}")
+    await ctx.send(f"```{message}```")
+
+
 @bot.event
 async def on_ready():
     log.info(f"Logged in as {bot.user} (ID: {bot.user.id})")
