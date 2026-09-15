@@ -47,9 +47,9 @@ The bot uses `?` as its command prefix. Commands are case-insensitive.
 
 | Command | Arguments | Description | Example |
 | :--- | :--- | :--- | :--- |
-| `?roster` | `<manager_name>` | Display the full roster, positions, lineup slots, and injury status for a team. | `?roster alex` |
+| `?roster` | `<manager_name>` | Display the full roster, positions, lineup slots, and injury status for a team. | `?roster john` |
 | `?projected` | `<week>` | Show projected scores for all league matchups for a given week (1–17). | `?projected 4` |
-| `?scores` | `<week> [manager_name]` | Show actual vs. projected box scores for all matchups, or filter by manager. | `?scores 4` or `?scores 4 julie` |
+| `?scores` | `<week> [manager_name]` | Show actual vs. projected box scores for all matchups, or filter by manager. | `?scores 4` or `?scores 4 jane` |
 
 ### Command Examples
 
